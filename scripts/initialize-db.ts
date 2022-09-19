@@ -23,10 +23,10 @@ async function initializeDB() {
     await dbClient.query(`
       CREATE TABLE IF NOT EXISTS users (
         user_id SERIAL PRIMARY KEY,
-        first_name VARCHAR(128) NOT NULL,
-        last_name VARCHAR(128),
+        first_name VARCHAR(64) NOT NULL,
+        last_name VARCHAR(64),
         email VARCHAR(255) UNIQUE NOT NULL,
-        password VARCHAR(60) NOT NULL,
+        password VARCHAR(64) NOT NULL,
         created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP NOT NULL DEFAULT 'now'::timestamp
       )

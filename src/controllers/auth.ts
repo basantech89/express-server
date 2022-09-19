@@ -26,9 +26,7 @@ const register = async (req: Request, res: Response) => {
               [first_name, last_name, email, hashedPassword]
             )
             .then(() =>
-              res
-                .status(201)
-                .json({ success: true, message: 'User successfully added to the database.' })
+              res.status(201).json({ success: true, message: 'User successfully signed up.' })
             )
             .catch(() => {
               res.status(500).json({
