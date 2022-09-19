@@ -96,11 +96,14 @@ const login = async (req: Request, res: Response) => {
 
 const logout = async (req: Request, res: Response) => {
   const sessionId = req.cookies?.sessionId
+
   if (sessionId) {
     delete sessions[sessionId]
+    res.clearCookie('sessionId')
+    res.status(200).json({ success: true })
+  } else {
+    res.status(401).json({ success: false, error: 'Unauthorized access.' })
   }
-  res.clearCookie('sessionId')
-  res.redirect('/')
 }
 
 export { login, logout, register }
