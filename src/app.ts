@@ -1,18 +1,17 @@
+import connectRedis from 'connect-redis'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import express, { Express, NextFunction, Response } from 'express'
 import session from 'express-session'
 import createError from 'http-errors'
+import Redis from 'ioredis'
 import logger from 'morgan'
 import path from 'path'
-import fileStore from 'session-file-store'
 
 import { errors } from './constants/errors'
 import indexRouter, { authRouter, usersRouter } from './routes'
 
 const app: Express = express()
-
-const FileStore = fileStore(session)
 
 const corsOptions = {
   origin: 'http://localhost:3000',
@@ -29,13 +28,22 @@ app.use(express.urlencoded({ extended: false }))
 app.use(cookieParser())
 app.use(express.static(path.join(__dirname, 'public')))
 
+const RedisStore = connectRedis(session)
+const redisClient = new Redis({
+  db: 0,
+  port: 18427,
+  host: 'redis-18427.c301.ap-south-1-1.ec2.cloud.redislabs.com',
+  username: 'default',
+  password: 'RPDOnFh9GPCW4A6glIZMW5EoK5xlMn5H'
+})
+
 app.use(
   session({
     name: 'user_id',
     secret: process.env.SESSION_SECRET || '3018bb28-5ea8-4485-9627-b21bd7b6cec3',
     saveUninitialized: false,
     resave: false,
-    store: new FileStore(),
+    store: new RedisStore({ client: redisClient }),
     cookie: {
       sameSite: true,
       secure: process.env.NODE_ENV === 'production',
