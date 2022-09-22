@@ -1,10 +1,7 @@
 import bcrypt from 'bcrypt'
-import { randomBytes } from 'crypto'
 import { Request, Response } from 'express'
-import jwt from 'jsonwebtoken'
 
 import dbClient from '../utils/db'
-import { sessions } from './../utils/index'
 
 const register = async (req: Request, res: Response) => {
   const { first_name, last_name, email, password } = req.body
@@ -61,27 +58,21 @@ const login = async (req: Request, res: Response) => {
       const user = rows[0]
       const match = await bcrypt.compare(password, user.password)
       if (match) {
-        const token = jwt.sign({ email }, process.env.SECRET_KEY, {
-          expiresIn: '1h'
+        // const token = jwt.sign({ email }, process.env.SECRET_KEY, {
+        //   expiresIn: '1h'
+        // })
+        req.session.user = user.user_id
+
+        return res.status(200).json({
+          success: true,
+          message: 'User signed in successfully.',
+          data: {
+            id: user.user_id,
+            first_name: user.first_name,
+            last_name: user.last_name,
+            email: user.email
+          }
         })
-
-        const sessionId = randomBytes(16).toString('base64')
-        sessions[sessionId] = email
-
-        return res
-          .cookie('sessionId', sessionId)
-          .status(200)
-          .json({
-            success: true,
-            message: 'User signed in successfully.',
-            data: {
-              id: user.user_id,
-              first_name: user.first_name,
-              last_name: user.last_name,
-              email: user.email,
-              token: token
-            }
-          })
       } else {
         res.status(406).json({
           success: false,
@@ -95,12 +86,15 @@ const login = async (req: Request, res: Response) => {
 }
 
 const logout = async (req: Request, res: Response) => {
-  const sessionId = req.cookies?.sessionId
-
-  if (sessionId) {
-    delete sessions[sessionId]
-    res.clearCookie('sessionId')
-    res.status(200).json({ success: true })
+  if (req.session) {
+    req.session.destroy(function (err) {
+      if (err) {
+        res.status(500).json({ success: false, error: 'Server Error.' })
+      } else {
+        res.clearCookie('user_id')
+        res.status(200).json({ success: true })
+      }
+    })
   } else {
     res.status(401).json({ success: false, error: 'Unauthorized access.' })
   }
