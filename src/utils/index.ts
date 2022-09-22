@@ -4,8 +4,6 @@ import { errors } from './../constants/errors'
 export const sessions = {}
 
 export const authenticate = (req: Request, res: Response, next: NextFunction) => {
-  console.log('req session', req.session.user, req.cookies.user_id)
-
   const user = req.session.user
   if (user && req.cookies.user_id) {
     return next()
