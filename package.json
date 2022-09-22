@@ -6,7 +6,7 @@
   "scripts": {
     "build": "rimraf ./dist && tsc",
     "serve": "node dist/index.js",
-    "start": "npm-run-all build serve",
+    "start": "npm run build && npm run serve",
     "dev": "nodemon",
     "initialize-db": "ts-node ./scripts/initialize-db.ts",
     "initialize-db:drop": "ts-node ./scripts/initialize-db.ts --drop"
