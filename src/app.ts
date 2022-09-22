@@ -7,36 +7,41 @@ import logger from 'morgan'
 import path from 'path'
 import fileStore from 'session-file-store'
 
+import { errors } from './constants/errors'
 import indexRouter, { authRouter, usersRouter } from './routes'
 
 const app: Express = express()
 
 const FileStore = fileStore(session)
 
+const corsOptions = {
+  origin: 'http://localhost:3000',
+  credentials: true
+}
+
+const oneHour = 60 * 60 * 1000
+
 app.use(logger('dev'))
 app.use(express.json())
-app.use(
-  cors({
-    origin: '*',
-    credentials: true
-  })
-)
+app.use(cors(corsOptions))
 
-app.use(express.urlencoded({ extended: true }))
+app.use(express.urlencoded({ extended: false }))
 app.use(cookieParser())
 app.use(express.static(path.join(__dirname, 'public')))
 
 app.use(
   session({
     name: 'user_id',
-    secret: process.env.COOKIE_SECRET || '08ab59f0-1822-42c2-8a66-0fdd09673211',
+    secret: process.env.SESSION_SECRET || '3018bb28-5ea8-4485-9627-b21bd7b6cec3',
     saveUninitialized: false,
     resave: false,
     store: new FileStore(),
     cookie: {
       sameSite: true,
       secure: process.env.NODE_ENV === 'production',
-      httpOnly: true
+      httpOnly: true,
+      signed: true,
+      maxAge: oneHour
     }
   })
 )
@@ -56,9 +61,7 @@ app.use(function (err, req, res: Response, next) {
   res.locals.message = err.message
   res.locals.error = req.app.get('env') === 'development' ? err : {}
 
-  // render the error page
-  res.status(err.status || 500)
-  res.render('error')
+  res.status(err.status || 500).json({ success: false, error: errors.SERVER_ERROR })
 })
 
 export default app

@@ -2,17 +2,18 @@ import bcrypt from 'bcrypt'
 import { Request, Response } from 'express'
 
 import dbClient from '../utils/db'
+import { errors } from './../constants/errors'
 
 const register = async (req: Request, res: Response) => {
   const { first_name, last_name, email, password } = req.body
   try {
     if (!first_name || !email || !password) {
-      return res.status(406).json({ success: false, error: 'Pl send user information' })
+      return res.status(406).json({ success: false, error: errors.USER_DATA_NEEDED })
     }
 
     const { rows } = await dbClient.query(`SELECT * FROM users WHERE email = $1;`, [email])
     if (rows.length > 0) {
-      return res.status(409).json({ success: false, error: `User ${email} already exists.` })
+      return res.status(409).json({ success: false, error: errors.USER_EXIST })
     } else {
       bcrypt
         .hash(password, 10)
@@ -28,19 +29,19 @@ const register = async (req: Request, res: Response) => {
             .catch(() => {
               res.status(500).json({
                 success: false,
-                error: 'User could not be added to the database.'
+                error: errors.USER_NOT_ADDED
               })
             })
         })
         .catch(() =>
           res.status(500).json({
             success: false,
-            error: 'User could not be added to the database.'
+            error: errors.USER_NOT_ADDED
           })
         )
     }
   } catch (error) {
-    res.status(500).json({ success: false, error: 'Server Error' })
+    res.status(500).json({ success: false, error: errors.SERVER_ERROR })
   }
 }
 
@@ -48,12 +49,12 @@ const login = async (req: Request, res: Response) => {
   const { email, password } = req.body
   try {
     if (!email || !password) {
-      return res.status(406).json({ success: false, error: 'Credentials are not supplied.' })
+      return res.status(406).json({ success: false, error: errors.USER_CRED_NEEDED })
     }
 
     const { rows } = await dbClient.query(`SELECT * FROM users WHERE email = $1;`, [email])
     if (rows.length === 0) {
-      res.status(406).json({ success: false, error: 'Incorrect credentials supplied.' })
+      res.status(406).json({ success: false, error: errors.FALSE_CRED })
     } else {
       const user = rows[0]
       const match = await bcrypt.compare(password, user.password)
@@ -76,27 +77,27 @@ const login = async (req: Request, res: Response) => {
       } else {
         res.status(406).json({
           success: false,
-          error: 'Incorrect credentials supplied.'
+          error: errors.FALSE_CRED
         })
       }
     }
   } catch (err) {
-    res.status(500).json({ success: false, error: 'Server Error.' })
+    res.status(500).json({ success: false, error: errors.SERVER_ERROR })
   }
 }
 
 const logout = async (req: Request, res: Response) => {
-  if (req.session) {
+  try {
     req.session.destroy(function (err) {
       if (err) {
-        res.status(500).json({ success: false, error: 'Server Error.' })
+        res.status(500).json({ success: false, error: errors.SERVER_ERROR })
       } else {
         res.clearCookie('user_id')
         res.status(200).json({ success: true })
       }
     })
-  } else {
-    res.status(401).json({ success: false, error: 'Unauthorized access.' })
+  } catch {
+    res.status(401).json({ success: false, error: errors.UNAUTHORIZED_ACCESS })
   }
 }
 
