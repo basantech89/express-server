@@ -45,7 +45,8 @@ app.use(
     resave: false,
     store: new RedisStore({ client: redisClient }),
     cookie: {
-      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'none',
+      secure: true,
       httpOnly: true,
       signed: true,
       maxAge: oneHour
