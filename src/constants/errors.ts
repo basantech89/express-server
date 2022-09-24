@@ -5,5 +5,6 @@ export const errors = {
   USER_CRED_NEEDED: 'Credentials not provided',
   FALSE_CRED: 'Incorrect credentials provided',
   USER_NOT_ADDED: 'User could not be added',
-  UNAUTHORIZED_ACCESS: 'Unauthorized access'
+  UNAUTHORIZED_ACCESS: 'Unauthorized access',
+  INVALID_TOKEN: 'Invalid token'
 }

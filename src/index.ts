@@ -5,10 +5,7 @@
  */
 
 import debug from 'debug'
-import fs from 'fs'
 import http from 'http'
-import https from 'https'
-import path from 'path'
 
 import app from './app'
 import dbClient from './utils/db'
@@ -19,19 +16,14 @@ debug('express-server:server')
  * Get port from environment and store in Express.
  */
 
-const port = normalizePort(process.env.PORT || '3443')
+const port = normalizePort(process.env.PORT || '3001')
 app.set('port', port)
-
-const options = {
-  key: fs.readFileSync(path.join(__dirname, '../key.pem')),
-  cert: fs.readFileSync(path.join(__dirname, '../cert.pem'))
-}
 
 /**
  * Create HTTP server.
  */
 
-const server = https.createServer(options, app)
+const server = http.createServer(app)
 
 /**
  * Listen on provided port, on all network interfaces.

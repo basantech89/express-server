@@ -1,5 +1,6 @@
 import bcrypt from 'bcrypt'
 import { Request, Response } from 'express'
+import jwt from 'jsonwebtoken'
 
 import dbClient from '../utils/db'
 import { errors } from './../constants/errors'
@@ -59,10 +60,9 @@ const login = async (req: Request, res: Response) => {
       const user = rows[0]
       const match = await bcrypt.compare(password, user.password)
       if (match) {
-        // const token = jwt.sign({ email }, process.env.SECRET_KEY, {
-        //   expiresIn: '1h'
-        // })
-        req.session.user = user.user_id
+        const token = jwt.sign({ user: user.user_id }, process.env.SECRET_KEY, {
+          expiresIn: '1h'
+        })
 
         return res.status(200).json({
           success: true,
@@ -71,7 +71,8 @@ const login = async (req: Request, res: Response) => {
             id: user.user_id,
             first_name: user.first_name,
             last_name: user.last_name,
-            email: user.email
+            email: user.email.token,
+            token
           }
         })
       } else {
