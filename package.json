@@ -4,7 +4,7 @@
   "private": true,
   "main": "dist/index.js",
   "scripts": {
-    "build": "rimraf ./dist && babel src --extensions .js,.ts --out-dir dist",
+    "build": "babel src --extensions .js,.ts --out-dir dist",
     "serve": "node dist/index.js",
     "start": "npm-run-all build serve",
     "dev": "nodemon",
