@@ -89,14 +89,14 @@ const login = async (req: Request, res: Response) => {
 
 const logout = async (req: Request, res: Response) => {
   try {
-    req.session.destroy(function (err) {
-      if (err) {
-        res.status(500).json({ success: false, error: errors.SERVER_ERROR })
-      } else {
-        res.clearCookie('user_id')
-        res.status(200).json({ success: true })
-      }
-    })
+    // req.session.destroy(function (err) {
+    //   if (err) {
+    //     res.status(500).json({ success: false, error: errors.SERVER_ERROR })
+    //   } else {
+    //     res.clearCookie('user_id')
+    //     res.status(200).json({ success: true })
+    //   }
+    // })
   } catch {
     res.status(401).json({ success: false, error: errors.UNAUTHORIZED_ACCESS })
   }
